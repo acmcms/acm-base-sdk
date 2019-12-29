@@ -87,7 +87,7 @@ public final class FormEntryEditSchedule extends AbstractForm<FormEntryEditSched
 								"User tasks ('*' in 'name' field) are ignored while object is in DRAFT state.",
 								Collections.singletonMap("ru", "Пользовательские задачи ('*' в поле 'имя') будут проигнорированы если объект находится в состоянии 'черновик'.")))
 						.setAttribute("content_fieldset", FormEntryEditSchedule.FIELDSET_LISTING)
-						.setAttribute("content_handler", new BaseFunctionActAbstract<Object, ContainerEntrySchedule>(Object.class, ContainerEntrySchedule.class) {
+						.setAttribute("content_handler", new BaseFunctionActAbstract<>(Object.class, ContainerEntrySchedule.class) {
 
 							@Override
 							public ContainerEntrySchedule apply(final Object arg) {

@@ -330,27 +330,27 @@ public final class Helper {
 	
 	private static final BaseHostLookup getLookupStatesImpl(final Collection<Integer> filter) {
 		final ControlLookupStatic result = new ControlLookupStatic();
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_DRAFT ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_DRAFT ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_DRAFT,
 					MultivariantString.getString( "Draft", Collections.singletonMap( "ru", "Черновик" ) ) );
 		}
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_READY ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_READY ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_READY,
 					MultivariantString.getString( "Ready", Collections.singletonMap( "ru", "Готов" ) ) );
 		}
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_SYSTEM ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_SYSTEM ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_SYSTEM,
 					MultivariantString.getString( "System", Collections.singletonMap( "ru", "Системный" ) ) );
 		}
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_PUBLISHED ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_PUBLISHED ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_PUBLISHED,
 					MultivariantString.getString( "Published", Collections.singletonMap( "ru", "Опубликованный" ) ) );
 		}
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_ARCHIEVED ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_ARCHIEVED ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_ARCHIEVED,
 					MultivariantString.getString( "Archive", Collections.singletonMap( "ru", "Архивный" ) ) );
 		}
-		if (filter == null || filter.contains( new Integer( ModuleInterface.STATE_DEAD ) )) {
+		if (filter == null || filter.contains( Integer.valueOf( ModuleInterface.STATE_DEAD ) )) {
 			result.putAppend( "" + ModuleInterface.STATE_DEAD,
 					MultivariantString.getString( "Dead", Collections.singletonMap( "ru", "Устаревший" ) ) );
 		}

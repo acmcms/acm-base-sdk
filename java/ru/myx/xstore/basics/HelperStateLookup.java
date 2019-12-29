@@ -53,22 +53,22 @@ final class HelperStateLookup extends BaseHostLookup {
 		
 		
 		final List<String> result = new ArrayList<>();
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_DRAFT))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_DRAFT))) {
 			result.add("" + ModuleInterface.STATE_DRAFT);
 		}
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_READY))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_READY))) {
 			result.add("" + ModuleInterface.STATE_READY);
 		}
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_SYSTEM))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_SYSTEM))) {
 			result.add("" + ModuleInterface.STATE_SYSTEM);
 		}
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_PUBLISHED))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_PUBLISHED))) {
 			result.add("" + ModuleInterface.STATE_PUBLISHED);
 		}
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_ARCHIEVED))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_ARCHIEVED))) {
 			result.add("" + ModuleInterface.STATE_ARCHIEVED);
 		}
-		if (this.filter == null || this.filter.contains(new Integer(ModuleInterface.STATE_DEAD))) {
+		if (this.filter == null || this.filter.contains(Integer.valueOf(ModuleInterface.STATE_DEAD))) {
 			result.add("" + ModuleInterface.STATE_DEAD);
 		}
 		return result.iterator();
