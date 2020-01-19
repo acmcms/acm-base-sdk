@@ -109,33 +109,33 @@ import ru.myx.xstore.RunnerScriptOnEntry;
 
 /** @author myx */
 public final class ThreadBootACM extends Thread {
-
+	
 	static final class ExceptionCatcher implements UncaughtExceptionHandler {
-
-		Throwable e;
 		
+		Throwable e;
+
 		@Override
 		public void uncaughtException(final Thread t, final Throwable e) {
-
+			
 			this.e = e;
 		}
 	}
-	
+
 	private static final int WATCHDOG_TIMEOUT = 300;
-	
+
 	private static final int WATCHDOG_CRITICAL = 30;
-	
+
 	private static final int EXIT_TIMEOUT = 30;
-	
+
 	private static final int EXIT_CRITICAL = 10;
-	
+
 	private static boolean touched = false;
-	
+
 	/**
 	 *
 	 */
 	public static final void init() {
-
+		
 		synchronized (ThreadBootACM.class) {
 			if (ThreadBootACM.touched) {
 				return;
@@ -173,10 +173,10 @@ public final class ThreadBootACM extends Thread {
 					System.out.println("BOOT: WATCHDOG: FATAL: Not initialized in " + ThreadBootACM.WATCHDOG_TIMEOUT + " seconds - system exit");
 					System.out.flush();
 					final Thread exitThread = new Thread() {
-
+						
 						@Override
 						public void run() {
-
+							
 							Runtime.getRuntime().exit(-2);
 						}
 					};
@@ -204,16 +204,16 @@ public final class ThreadBootACM extends Thread {
 			// ignore
 		}
 	}
-	
-	private static final void initClass(final Class<?> cls) throws ClassNotFoundException {
 
+	private static final void initClass(final Class<?> cls) throws ClassNotFoundException {
+		
 		final String name = cls.getName();
 		System.out.println("BOOT: class: " + name);
 		Class.forName(name, true, ThreadBootACM.class.getClassLoader());
 	}
-	
-	private static final Guid initIdentity(final String key, final File source) {
 
+	private static final Guid initIdentity(final String key, final File source) {
+		
 		{
 			final Guid parameter = Guid.fromBase64(System.getProperty(key, ""));
 			if (parameter != Guid.GUID_NULL) {
@@ -264,17 +264,17 @@ public final class ThreadBootACM extends Thread {
 			return generated;
 		}
 	}
-	
-	private static final void initProperty(final String key, final String valueDefault) {
 
+	private static final void initProperty(final String key, final String valueDefault) {
+		
 		System.setProperty(key, System.getProperty(key, valueDefault));
 	}
-	
+
 	private boolean instanceTouched = false;
-	
+
 	@Override
 	public void run() {
-
+		
 		synchronized (this) {
 			if (this.instanceTouched) {
 				throw new IllegalStateException("Second time?");
@@ -287,21 +287,21 @@ public final class ThreadBootACM extends Thread {
 			ThreadBootACM
 					.initProperty("ru.myx.ae3.properties.path.protected", new File(new File(new File(System.getProperty("user.home")), "acm.cm5"), "protected").getAbsolutePath());
 			ThreadBootACM.initProperty("ru.myx.ae3.properties.path.public", new File(System.getProperty("user.dir")).getAbsolutePath());
-			
+
 			/** Actually initializes Engine! */
 			final Guid guidCluster = ThreadBootACM.initIdentity("ru.myx.ae3.properties.cluster.identity", Engine.PATH_PROTECTED);
 			final Guid guidInstance = ThreadBootACM.initIdentity("ru.myx.ae3.properties.instance.identity", Engine.PATH_PRIVATE);
 			final Guid guidSession = ThreadBootACM.initIdentity("ru.myx.ae3.properties.session.identity", null);
-			
+
 			/** Initialize report */
 			{
-				System.out.println("BOOT: Log root folder: " + Report.LOG_ROOT_PATH);
 				System.out.println("BOOT: Current Report/Event level is " + Report.LEVEL_NAME);
-				System.out.println("BOOT: Assertion checks are " + (Report.MODE_ASSERT
-					? "ON"
-					: "OFF"));
+				System.out.println(
+						"BOOT: Assertion checks are " + (Report.MODE_ASSERT
+							? "ON"
+							: "OFF"));
 			}
-			
+
 			{
 				{
 					System.out.println("BOOT: --------------------------------------------------------------");
@@ -364,9 +364,9 @@ public final class ThreadBootACM extends Thread {
 				}
 				{
 					System.out.println("BOOT: init system classes: start");
-					
+
 					ThreadBootACM.initClass(Text.class);
-					
+
 					ThreadBootACM.initClass(Evaluate.class);
 					ThreadBootACM.initClass(Dom.class);
 					ThreadBootACM.initClass(Report.class);
@@ -376,9 +376,9 @@ public final class ThreadBootACM extends Thread {
 					ThreadBootACM.initClass(ReplyAnswer.class);
 					ThreadBootACM.initClass(Reflect.class);
 					ThreadBootACM.initClass(LayoutEngine.class);
-					
+
 					ThreadBootACM.initClass(Context.class);
-					
+
 					ThreadBootACM.initClass(CacheFactory.class);
 					ThreadBootACM.initClass(Lock.class);
 					ThreadBootACM.initClass(Handle.class);
@@ -386,12 +386,12 @@ public final class ThreadBootACM extends Thread {
 					ThreadBootACM.initClass(Control.class);
 					ThreadBootACM.initClass(ControlField.class);
 					ThreadBootACM.initClass(ControlFieldset.class);
-					
+
 					ThreadBootACM.initClass(ImagingSAPI.class);
 					ThreadBootACM.initClass(ControlSAPI.class);
-					
+
 				}
-				
+
 				System.out.println("BOOT: init system classes: done");
 				{
 					System.out.flush();
@@ -401,11 +401,11 @@ public final class ThreadBootACM extends Thread {
 			{
 				assert process == Exec.currentProcess() : "Must be run in root process!";
 			}
-
+			
 			final BaseObject GLOBAL = ExecProcess.GLOBAL;
 			assert GLOBAL != null : "Global object is NULL!";
 			assert !GLOBAL.baseIsPrimitive() : "Global object is primitive!";
-			
+
 			/** ACM specific */
 			{
 				{
@@ -413,7 +413,7 @@ public final class ThreadBootACM extends Thread {
 					final BaseObject reportRegistry = Base.forUnknown(new ReceiverMultiple(reciever));
 					GLOBAL.baseDefine("$reportAudit", reportRegistry, BaseProperty.ATTRS_MASK_NNN);
 					GLOBAL.baseDefine("$reportLog", reportRegistry, BaseProperty.ATTRS_MASK_NNN);
-					
+
 					final EventRecieverToStdout ets = new EventRecieverToStdout();
 					Context.getServer(process).registerEventReciever(ets);
 					StatusRegistry.ROOT_REGISTRY.register(new EvtState(ets));
@@ -423,7 +423,7 @@ public final class ThreadBootACM extends Thread {
 						t.printStackTrace();
 					}
 				}
-				
+
 				{
 					final BaseObject CreateSAPI = new CreateSAPI();
 					GLOBAL.baseDefine("Create", CreateSAPI, BaseProperty.ATTRS_MASK_WND);
@@ -440,27 +440,27 @@ public final class ThreadBootACM extends Thread {
 					assert GLOBAL.baseGet("Default", BaseObject.UNDEFINED) == DEFAULT : "Should be equal!";
 					assert GLOBAL.baseGet("DefaultAPI", BaseObject.UNDEFINED) == DEFAULT : "Should be equal!";
 					assert GLOBAL.baseGet("", BaseObject.UNDEFINED) == DEFAULT : "Should be equal!";
-					
+
 					{
 						final Iterator<? extends CharSequence> iterator = DEFAULT.baseKeysOwnAll();
 						for (; iterator.hasNext();) {
-							
+
 							final BasePrimitiveString name = Base.forString(iterator.next());
-							
+
 							assert BaseObject.PROTOTYPE.baseGetOwnProperty(name) == null //
 							: "Standard methods should not be overridden here";
-							
+
 							assert GLOBAL.baseGetOwnProperty(name) == null //
 							: "GLOBAL object is not expected to have property named: " + name;
-							
+
 							GLOBAL.baseDefine(name, DEFAULT.baseGet(name, BaseObject.UNDEFINED), BaseProperty.ATTRS_MASK_NNN);
-							
+
 						}
 					}
-					
+
 					{
 						for (final Method method : DefaultSAPI.class.getDeclaredMethods()) {
-							
+
 							final String name = method.getName();
 							if (BaseObject.PROTOTYPE.baseGet(name, null) != null) {
 								/** We don't want to override standard methods here, not in this
@@ -468,17 +468,17 @@ public final class ThreadBootACM extends Thread {
 								continue;
 							}
 							final BaseObject value = DEFAULT.baseGet(name, BaseObject.UNDEFINED);
-							
+
 							assert GLOBAL.baseGet(name, null) == null || GLOBAL.baseGet(name, BaseObject.UNDEFINED) == value //
 							: "GLOBAL object is not expected to have property named: " + name;
-							
+
 							GLOBAL.baseDefine(name, value, BaseProperty.ATTRS_MASK_NNN);
-							
+
 						}
 					}
 				}
 			}
-
+			
 			/** AE3 specific */
 			{
 				@SuppressWarnings("unchecked")
@@ -489,26 +489,26 @@ public final class ThreadBootACM extends Thread {
 						new EntrySimple<>("Random", Base.forUnknown(new RandomSAPI())), //
 						new EntrySimple<>("Reflection", Base.forUnknown(new ReflectionSAPI())), //
 				};
-				
+
 				for (final Map.Entry<String, BaseObject> sapi : entries) {
 					final String simpleName = sapi.getKey();
 					final String apiName = simpleName + "API";
 					System.out.println("BOOT: init system global object (AE3): " + simpleName + " / " + apiName);
-					
+
 					GLOBAL.baseDefine(simpleName, sapi.getValue(), BaseProperty.ATTRS_MASK_WNN);
 					GLOBAL.baseDefine(apiName, sapi.getValue(), BaseProperty.ATTRS_MASK_NEN);
-					
+
 					assert GLOBAL.baseGet(apiName, BaseObject.UNDEFINED) != BaseObject.UNDEFINED //
 					: "Must be DEFINED (apiName:" + apiName + ")!";
 				}
 			}
-			
+
 			assert process == Exec.currentProcess() : "Must be run in root process!";
-			
+
 			{
 				GLOBAL.baseDefine("intl", new Function_intl(), BaseProperty.ATTRS_MASK_NNN);
 			}
-			
+
 			{
 				System.out.println("BOOT: init system global objects: calendar object");
 				final BaseObject CALENDAR = Base.forUnknown(new CalendarSAPI());
@@ -564,28 +564,28 @@ public final class ThreadBootACM extends Thread {
 					System.out.println("BOOT: init system global.js: not found");
 				} else {
 					final EntryBinary binary = global.toBinary();
-					
+
 					System.out.println("BOOT: init system global.js: " + Format.Compact.toBytes(binary.getBinaryContentLength()) + "bytes");
-					
+
 					final ExecProcess ctx = Exec.createProcess(process, "public global.js initialisation context");
-					
+
 					final ProgramAssembly assembly = new ProgramAssembly(ctx);
 					Evaluate.compileProgramInline(
 							AcmEcmaLanguageImpl.INSTANCE,
 							"public, global.js initialisation script",
 							binary.getBinaryContent().baseValue().toString(),
 							assembly);
-					
+
 					final Throwable error = Act.run(ctx, new Runnable() {
-						
+
 						@Override
 						public void run() {
-
+							
 							ctx.vmScopeDeriveContext(GLOBAL);
 							assembly.toProgram(0).callVE0(ctx, GLOBAL);
 						}
 					});
-
+					
 					if (error != null) {
 						error.printStackTrace();
 						runtime.exit(-1);
@@ -593,50 +593,51 @@ public final class ThreadBootACM extends Thread {
 					}
 				}
 			}
-			
+
 			{
 				Produce.registerFactory(new AccessUserFactory());
 				Produce.registerFactory(new AccessGroupFactory());
 			}
-			
+
 			{
 				// FIXME: move to ImplementVfs when it will exist
 				System.out.println("BOOT: initialize VFS storage mount");
-				
+
 				try {
 					Storage.mount(Storage.getRoot(null), "status", TreeLinkType.PUBLIC_TREE_REFERENCE, Storage.createRoot(new StorageImplStatus(StatusRegistry.ROOT_REGISTRY)));
 				} catch (final Throwable e) {
 					e.printStackTrace();
 					runtime.exit(-1);
 				}
-				
+
 				try {
 					final String storage = System.getProperty("ru.myx.ae3.properties.vfs.storage", "s4fs:lcl:bdbje");
-					
+
 					final BaseList<Object> constants = BaseObject.createArray(2);
 					constants.baseDefaultPush(Base.forString("ru.myx.ae3.sys/vfs/VfsStorageFactory"));
 					constants.baseDefaultPush(Base.forString(storage));
-					
+
 					final ExecProcess ctx = Exec.createProcess(process, "Main storage initialization");
 					ctx.vmScopeDeriveContext(ExecProcess.GLOBAL);
-					
+
 					final Object o = Evaluate.evaluateObject("require( @0 ).create( @1 )", ctx, constants).baseValue();
-					
+
 					if (!(o instanceof ArsStorageImpl)) {
-						throw new IllegalArgumentException("Not a storage. Storage: " + storage + ", class: " + (o == null
-							? "null"
-							: o.getClass().getName()) + ", object: " + Format.Describe.toEcmaSource(o, ""));
+						throw new IllegalArgumentException(
+								"Not a storage. Storage: " + storage + ", class: " + (o == null
+									? "null"
+									: o.getClass().getName()) + ", object: " + Format.Describe.toEcmaSource(o, ""));
 					}
-					
+
 					final EntryContainer root = Storage.createRoot((ArsStorageImpl<?, ?, ?>) o);
-					
+
 					Storage.mount(Storage.getRoot(null), "storage", TreeLinkType.PUBLIC_TREE_REFERENCE, root);
 				} catch (final Throwable e) {
 					e.printStackTrace();
 					runtime.exit(-1);
 				}
 			}
-			
+
 			System.out.println("BOOT: initialize transform");
 			{
 				LayoutEngine.getDocumentation();
@@ -703,7 +704,7 @@ public final class ThreadBootACM extends Thread {
 				ProvideRunner.register("DatabaseTransfer", new RunnerDatabaseTransfer());
 				ProvideRunner.register("DatabaseUpdate", new RunnerDatabaseUpdate());
 			}
-			
+
 			CrisisWatcherService.checkStart();
 			System.out.println("BOOT: done.");
 		} catch (final Throwable t) {
