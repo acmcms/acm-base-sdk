@@ -8,6 +8,7 @@ package ru.myx.file_control;
  */
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import ru.myx.ae2.watch.Watch;
 import ru.myx.ae3.Engine;
@@ -24,27 +25,27 @@ public class FileControl {
 	static final void createExecuteFlag(final File executeFlag) throws Exception {
 		try (final FileOutputStream fos = new FileOutputStream( executeFlag )) {
 			fos.write( "Delete this file to execute command stored in execute.command file, \r\n execution output will be saved in execute.out and execute.err files.\r\n\r\n* The modification date of this file indicates when file-control service was last checked this flag."
-					.getBytes( Engine.CHARSET_UTF8 ) );
+					.getBytes( StandardCharsets.UTF_8 ) );
 		}
 	}
 	
 	private static final void createRestartFlag(final File restartFlag) throws Exception {
 		try (final FileOutputStream fos = new FileOutputStream( restartFlag )) {
 			fos.write( "Delete this file to restart the system.\r\n\r\n* The modification date of this file indicates when file-control service was last checked this flag."
-					.getBytes( Engine.CHARSET_UTF8 ) );
+					.getBytes( StandardCharsets.UTF_8 ) );
 		}
 	}
 	
 	static final void createSuspendReadyFlag(final File suspendReadyFlag) throws Exception {
 		try (final FileOutputStream fos = new FileOutputStream( suspendReadyFlag )) {
 			fos.write( "System is ready to suspend. Create 'suspend' file flag to suspend."
-					.getBytes( Engine.CHARSET_UTF8 ) );
+					.getBytes( StandardCharsets.UTF_8 ) );
 		}
 	}
 	
 	static final void createSuspendWaitingFlag(final File suspendWaitingFlag) throws Exception {
 		try (final FileOutputStream fos = new FileOutputStream( suspendWaitingFlag )) {
-			fos.write( "System is suspended. Delete 'suspend' file flag to resume.".getBytes( Engine.CHARSET_UTF8 ) );
+			fos.write( "System is suspended. Delete 'suspend' file flag to resume.".getBytes( StandardCharsets.UTF_8 ) );
 		}
 	}
 	
