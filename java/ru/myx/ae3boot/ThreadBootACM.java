@@ -70,7 +70,7 @@ import ru.myx.ae3.vfs.EntryBinary;
 import ru.myx.ae3.vfs.EntryContainer;
 import ru.myx.ae3.vfs.Storage;
 import ru.myx.ae3.vfs.TreeLinkType;
-import ru.myx.ae3.vfs.ars.ArsStorageImpl;
+import ru.myx.ae3.vfs.ars.ArsStorage;
 import ru.myx.ae3.vfs.status.StorageImplStatus;
 import ru.myx.file_control.FileControl;
 import ru.myx.geo.GeographyImpl;
@@ -622,14 +622,14 @@ public final class ThreadBootACM extends Thread {
 
 					final Object o = Evaluate.evaluateObject("require( @0 ).create( @1 )", ctx, constants).baseValue();
 
-					if (!(o instanceof ArsStorageImpl)) {
+					if (!(o instanceof ArsStorage)) {
 						throw new IllegalArgumentException(
 								"Not a storage. Storage: " + storage + ", class: " + (o == null
 									? "null"
 									: o.getClass().getName()) + ", object: " + Format.Describe.toEcmaSource(o, ""));
 					}
 
-					final EntryContainer root = Storage.createRoot((ArsStorageImpl<?, ?, ?>) o);
+					final EntryContainer root = Storage.createRoot((ArsStorage<?, ?, ?>) o);
 
 					Storage.mount(Storage.getRoot(null), "storage", TreeLinkType.PUBLIC_TREE_REFERENCE, root);
 				} catch (final Throwable e) {
