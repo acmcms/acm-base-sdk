@@ -18,27 +18,30 @@ import ru.myx.ae3.binary.Transfer;
  */
 
 final class FileControlWatcher implements Watch.Monitor {
-	private final File	restartFlag;
+
+	private final File restartFlag;
 	
-	private final File	suspendFlag;
+	private final File suspendFlag;
 	
-	private final File	suspendReadyFlag;
+	private final File suspendReadyFlag;
 	
-	private final File	executeFlag;
+	private final File executeFlag;
 	
-	private final File	executeCommand;
+	private final File executeCommand;
 	
-	private final File	executeOut;
+	private final File executeOut;
 	
-	private final File	executeErr;
+	private final File executeErr;
 	
-	FileControlWatcher(final File restartFlag,
+	FileControlWatcher(
+			final File restartFlag,
 			final File suspendFlag,
 			final File suspendReadyFlag,
 			final File executeFlag,
 			final File executeCommand,
 			final File executeOut,
 			final File executeErr) {
+
 		this.restartFlag = restartFlag;
 		this.suspendFlag = suspendFlag;
 		this.suspendReadyFlag = suspendReadyFlag;
@@ -50,69 +53,69 @@ final class FileControlWatcher implements Watch.Monitor {
 	
 	@Override
 	public boolean check() throws Exception {
+
 		if (!this.restartFlag.exists()) {
-			System.out.println( "RU.MYX.AE2CTRL.FILECONTROL: restarting..." );
+			System.out.println("RU.MYX.AE2CTRL.FILECONTROL: restarting...");
 			try {
-				Runtime.getRuntime().exit( 0 );
+				Runtime.getRuntime().exit(0);
 			} catch (final Throwable t) {
 				t.printStackTrace();
 				try {
-					Thread.sleep( 20000L );
+					Thread.sleep(20_000L);
 				} catch (final InterruptedException ie) {
 					// ignore
 				}
-				Runtime.getRuntime().halt( 0 );
+				Runtime.getRuntime().halt(0);
 			}
-			System.out.println( "RU.MYX.AE2CTRL.FILECONTROL: RESTART FAILED!..." );
+			System.out.println("RU.MYX.AE2CTRL.FILECONTROL: RESTART FAILED!...");
 			return false;
 		}
-		this.restartFlag.setLastModified( Engine.fastTime() );
+		this.restartFlag.setLastModified(Engine.fastTime());
 		if (this.suspendFlag.exists()) {
-			System.out.println( "RU.MYX.AE2CTRL.FILECONTROL: suspending (restarting)..." );
+			System.out.println("RU.MYX.AE2CTRL.FILECONTROL: suspending (restarting)...");
 			this.suspendReadyFlag.delete();
 			try {
-				Runtime.getRuntime().exit( 0 );
+				Runtime.getRuntime().exit(0);
 			} catch (final Throwable t) {
 				t.printStackTrace();
 				try {
-					Thread.sleep( 20000L );
+					Thread.sleep(20_000L);
 				} catch (final InterruptedException ie) {
 					// ignore
 				}
-				Runtime.getRuntime().halt( 0 );
+				Runtime.getRuntime().halt(0);
 			}
-			System.out.println( "RU.MYX.AE2CTRL.FILECONTROL: RESTART FAILED!..." );
+			System.out.println("RU.MYX.AE2CTRL.FILECONTROL: RESTART FAILED!...");
 			return false;
 		}
-		this.suspendReadyFlag.setLastModified( Engine.fastTime() );
+		this.suspendReadyFlag.setLastModified(Engine.fastTime());
 		if (!this.executeFlag.exists()) {
 			try {
-				final Process process = Runtime.getRuntime().exec( Transfer.createBuffer( this.executeCommand )
-						.toString() );
+				final Process process = Runtime.getRuntime().exec(Transfer.createBuffer(this.executeCommand).toString());
 				final InputStream stdout = process.getInputStream();
 				final InputStream stderr = process.getErrorStream();
-				final FileOutputStream fout = new FileOutputStream( this.executeOut );
-				final FileOutputStream ferr = new FileOutputStream( this.executeErr );
+				final FileOutputStream fout = new FileOutputStream(this.executeOut);
+				final FileOutputStream ferr = new FileOutputStream(this.executeErr);
 				
-				Act.launch( null, new Feeder( stdout, fout ) );
+				Act.launch(null, new Feeder(stdout, fout));
 				
-				Act.launch( null, new Feeder( stderr, ferr ) );
+				Act.launch(null, new Feeder(stderr, ferr));
 				
 				process.waitFor();
 				
 			} catch (final Throwable t) {
-				try (final FileOutputStream fout = new FileOutputStream( this.executeOut )) {
+				try (final FileOutputStream fout = new FileOutputStream(this.executeOut)) {
 					//
 				}
 				
-				try (final PrintStream ferr = new PrintStream( new FileOutputStream( this.executeErr ) )) {
-					t.printStackTrace( ferr );
+				try (final PrintStream ferr = new PrintStream(new FileOutputStream(this.executeErr))) {
+					t.printStackTrace(ferr);
 				}
 			} finally {
-				FileControl.createExecuteFlag( this.executeFlag );
+				FileControl.createExecuteFlag(this.executeFlag);
 			}
 		} else {
-			this.executeFlag.setLastModified( Engine.fastTime() );
+			this.executeFlag.setLastModified(Engine.fastTime());
 		}
 		return true;
 	}

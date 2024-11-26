@@ -191,7 +191,7 @@ final class QueryInfo {
 		if (response.isPrivate()) {
 			return response;
 		}
-		cache.put(guid, cid, response, 1000L * 60L * 60L);
+		cache.put(guid, cid, response, 60_000L * 60L);
 		return response.nextClone(query);
 	}
 
@@ -309,7 +309,7 @@ final class QueryInfo {
 				 *
 				 */
 				final String key = targetEntry.getGuid();
-				if (serverTtl > 30000L) {
+				if (serverTtl > 30_000L) {
 					cache = parent.getObjectCache();
 					cid = "resp:" + query.getUrl();
 					response = cache.get(key, cid);

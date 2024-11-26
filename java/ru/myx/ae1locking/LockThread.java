@@ -19,30 +19,33 @@ import ru.myx.jdbc.lock.Interest;
  * Created on 10.04.2006
  */
 final class LockThread implements Runnable {
-	private static final long		TIME_CHECK_PERIOD		= 1L * 60L * 1000L;
 	
-	private static final long		TIME_RELEASE			= 5L * 60L * 1000L;
-	
-	private static final long		TIME_LOCK_EXPIRATION	= 3L * 60L * 1000L;
-	
-	private static final long		TIME_HOLD_LOCK			= 60L * 60L * 1000L;
-	
-	private final LockManagerImpl	manager;
-	
-	private final String			tableName;
-	
-	private final String			identity;
-	
-	private boolean					destroyed				= false;
-	
+	private static final long TIME_CHECK_PERIOD = 1L * 60_000L;
+
+	private static final long TIME_RELEASE = 5L * 60_000L;
+
+	private static final long TIME_LOCK_EXPIRATION = 3L * 60_000L;
+
+	private static final long TIME_HOLD_LOCK = 60L * 60_000L;
+
+	private final LockManagerImpl manager;
+
+	private final String tableName;
+
+	private final String identity;
+
+	private boolean destroyed = false;
+
 	LockThread(final LockManagerImpl manager, final String tableName, final String identity) {
+		
 		this.manager = manager;
 		this.tableName = tableName;
 		this.identity = identity;
 	}
-	
+
 	@Override
 	public void run() {
+		
 		if (this.destroyed) {
 			return;
 		}
@@ -57,7 +60,7 @@ final class LockThread implements Runnable {
 				for (; !passQueue.isEmpty();) {
 					final QueueRecord record = passQueue.getFirst();
 					if (record.date < date) {
-						waitLocks.add( record.lock );
+						waitLocks.add(record.lock);
 						passQueue.removeFirst();
 					} else {
 						break;
@@ -68,13 +71,13 @@ final class LockThread implements Runnable {
 					if (record.date < date) {
 						try {
 							record.lock.runner.stop();
-							Report.info( "DS/LOCK_MANAGER", "Stopping a task: " + record.lock.lock );
+							Report.info("DS/LOCK_MANAGER", "Stopping a task: " + record.lock.lock);
 						} catch (final Throwable t) {
-							Report.exception( "DS/LOCK_MANAGER", "Error stopping a task", t );
+							Report.exception("DS/LOCK_MANAGER", "Error stopping a task", t);
 						}
-						ownLocks.remove( record.lock );
-						passQueue.add( new QueueRecord( date + LockThread.TIME_RELEASE, record.lock ) );
-						releaseLocks.add( record.lock );
+						ownLocks.remove(record.lock);
+						passQueue.add(new QueueRecord(date + LockThread.TIME_RELEASE, record.lock));
+						releaseLocks.add(record.lock);
 						ownQueue.removeFirst();
 					} else {
 						break;
@@ -84,20 +87,16 @@ final class LockThread implements Runnable {
 					if (conn == null) {
 						return;
 					}
-					try (final PreparedStatement ps = conn.prepareStatement( "DELETE FROM "
-							+ this.tableName
-							+ " WHERE lockExpiration<?" )) {
-						ps.setTimestamp( 1, new Timestamp( date ) );
+					try (final PreparedStatement ps = conn.prepareStatement("DELETE FROM " + this.tableName + " WHERE lockExpiration<?")) {
+						ps.setTimestamp(1, new Timestamp(date));
 						ps.executeUpdate();
 					}
 					if (!releaseLocks.isEmpty()) {
-						try (final PreparedStatement ps = conn.prepareStatement( "DELETE FROM "
-								+ this.tableName
-								+ " WHERE lockType=? AND lockVersion=? AND lockId=?" )) {
+						try (final PreparedStatement ps = conn.prepareStatement("DELETE FROM " + this.tableName + " WHERE lockType=? AND lockVersion=? AND lockId=?")) {
 							for (final Interest lock : releaseLocks) {
-								ps.setString( 1, lock.lock );
-								ps.setInt( 2, lock.version );
-								ps.setString( 3, this.identity );
+								ps.setString(1, lock.lock);
+								ps.setInt(2, lock.version);
+								ps.setString(3, this.identity);
 								ps.executeUpdate();
 								ps.clearParameters();
 							}
@@ -106,29 +105,25 @@ final class LockThread implements Runnable {
 					if (!ownLocks.isEmpty()) {
 						final Set<Interest> lostLocks = new HashSet<>();
 						for (final Interest lock : ownLocks) {
-							try (final PreparedStatement ps = conn.prepareStatement( "UPDATE "
-									+ this.tableName
-									+ " SET lockExpiration=? WHERE lockType=? AND lockVersion=? AND lockId=?" )) {
-								ps.setTimestamp( 1, new Timestamp( Engine.fastTime() + LockThread.TIME_LOCK_EXPIRATION ) );
-								ps.setString( 2, lock.lock );
-								ps.setInt( 3, lock.version );
-								ps.setString( 4, this.identity );
+							try (final PreparedStatement ps = conn
+									.prepareStatement("UPDATE " + this.tableName + " SET lockExpiration=? WHERE lockType=? AND lockVersion=? AND lockId=?")) {
+								ps.setTimestamp(1, new Timestamp(Engine.fastTime() + LockThread.TIME_LOCK_EXPIRATION));
+								ps.setString(2, lock.lock);
+								ps.setInt(3, lock.version);
+								ps.setString(4, this.identity);
 								if (ps.executeUpdate() == 0) {
-									lostLocks.add( lock );
+									lostLocks.add(lock);
 								} else {
-									/**
-									 * TODO: pre-cache for queue
-									 */
-									try (final PreparedStatement ps2 = conn.prepareStatement( "SELECT lockId FROM "
-											+ this.tableName
-											+ " WHERE lockType=? ORDER BY lockVersion DESC",
-											ResultSet.TYPE_FORWARD_ONLY,
-											ResultSet.CONCUR_READ_ONLY )) {
-										ps2.setString( 1, lock.lock );
-										ps2.setMaxRows( 1 );
+											/** TODO: pre-cache for queue */
+											try (final PreparedStatement ps2 = conn.prepareStatement(
+													"SELECT lockId FROM " + this.tableName + " WHERE lockType=? ORDER BY lockVersion DESC",
+													ResultSet.TYPE_FORWARD_ONLY,
+													ResultSet.CONCUR_READ_ONLY)) {
+										ps2.setString(1, lock.lock);
+										ps2.setMaxRows(1);
 										try (final ResultSet rs = ps2.executeQuery()) {
-											if (rs.next() && !this.identity.equals( rs.getString( 1 ) )) {
-												lostLocks.add( lock );
+											if (rs.next() && !this.identity.equals(rs.getString(1))) {
+												lostLocks.add(lock);
 											}
 										}
 									}
@@ -138,83 +133,63 @@ final class LockThread implements Runnable {
 						if (!lostLocks.isEmpty()) {
 							for (final Iterator<QueueRecord> i = ownQueue.iterator(); i.hasNext();) {
 								final QueueRecord record = i.next();
-								if (lostLocks.contains( record.lock )) {
-									Report.warning( "DS/LOCK_MANAGER", "Lost task lock, taskVersion="
-											+ record.lock.version
-											+ ", taskId="
-											+ record.lock.lock );
+								if (lostLocks.contains(record.lock)) {
+									Report.warning("DS/LOCK_MANAGER", "Lost task lock, taskVersion=" + record.lock.version + ", taskId=" + record.lock.lock);
 									try {
 										record.lock.runner.stop();
 									} catch (final Throwable t) {
-										Report.exception( "DS/LOCK_MANAGER", "Error stopping a task", t );
+										Report.exception("DS/LOCK_MANAGER", "Error stopping a task", t);
 									}
 									i.remove();
 								}
 							}
-							ownLocks.removeAll( lostLocks );
-							waitLocks.addAll( lostLocks );
+							ownLocks.removeAll(lostLocks);
+							waitLocks.addAll(lostLocks);
 						}
 					}
 					if (!waitLocks.isEmpty()) {
 						for (final Iterator<Interest> i = waitLocks.iterator(); i.hasNext();) {
 							final Interest lock = i.next();
 							try {
-								try (final PreparedStatement ps = conn.prepareStatement( "INSERT INTO "
-										+ this.tableName
-										+ "(lockType,lockVersion,lockId,lockDate,lockExpiration) VALUES (?,?,?,?,?)" )) {
-									ps.setString( 1, lock.lock );
-									ps.setInt( 2, lock.version );
-									ps.setString( 3, this.identity );
-									ps.setTimestamp( 4, new Timestamp( Engine.fastTime() ) );
-									ps.setTimestamp( 5, new Timestamp( Engine.fastTime()
-											+ LockThread.TIME_LOCK_EXPIRATION ) );
+								try (final PreparedStatement ps = conn
+										.prepareStatement("INSERT INTO " + this.tableName + "(lockType,lockVersion,lockId,lockDate,lockExpiration) VALUES (?,?,?,?,?)")) {
+									ps.setString(1, lock.lock);
+									ps.setInt(2, lock.version);
+									ps.setString(3, this.identity);
+									ps.setTimestamp(4, new Timestamp(Engine.fastTime()));
+									ps.setTimestamp(5, new Timestamp(Engine.fastTime() + LockThread.TIME_LOCK_EXPIRATION));
 									ps.execute();
 								}
-								try (final PreparedStatement ps = conn
-										.prepareStatement( "SELECT lockId, lockVersion FROM "
-												+ this.tableName
-												+ " WHERE lockType=? ORDER BY lockVersion DESC",
-												ResultSet.TYPE_FORWARD_ONLY,
-												ResultSet.CONCUR_READ_ONLY )) {
-									ps.setString( 1, lock.lock );
-									ps.setMaxRows( 1 );
+								try (final PreparedStatement ps = conn.prepareStatement(
+										"SELECT lockId, lockVersion FROM " + this.tableName + " WHERE lockType=? ORDER BY lockVersion DESC",
+										ResultSet.TYPE_FORWARD_ONLY,
+										ResultSet.CONCUR_READ_ONLY)) {
+									ps.setString(1, lock.lock);
+									ps.setMaxRows(1);
 									try (final ResultSet rs = ps.executeQuery()) {
 										if (rs.next()) {
-											if (this.identity.equals( rs.getString( 1 ) )) {
+											if (this.identity.equals(rs.getString(1))) {
 												try {
 													lock.runner.start();
-													Report.info( "DS/LOCK_MANAGER", "Starting a task: " + lock.lock );
+													Report.info("DS/LOCK_MANAGER", "Starting a task: " + lock.lock);
 												} catch (final Throwable t) {
-													Report.exception( "DS/LOCK_MANAGER", "Error starting a task", t );
+													Report.exception("DS/LOCK_MANAGER", "Error starting a task", t);
 												}
 												i.remove();
-												ownLocks.add( lock );
-												ownQueue.add( new QueueRecord( Engine.fastTime()
-														+ LockThread.TIME_HOLD_LOCK, lock ) );
+												ownLocks.add(lock);
+												ownQueue.add(new QueueRecord(Engine.fastTime() + LockThread.TIME_HOLD_LOCK, lock));
 												break;
 											}
-											final int otherVersion = rs.getInt( 2 );
+											final int otherVersion = rs.getInt(2);
 											if (otherVersion > lock.version) {
-												Report.warning( "DS/LOCK_MANAGER",
-														"Ignore task, newer version detected, taskVersion="
-																+ lock.version
-																+ " vs "
-																+ otherVersion
-																+ ", taskId="
-																+ lock.lock );
+												Report.warning(
+														"DS/LOCK_MANAGER",
+														"Ignore task, newer version detected, taskVersion=" + lock.version + " vs " + otherVersion + ", taskId=" + lock.lock);
 											} else {
-												Report.warning( "DS/LOCK_MANAGER",
-														"Ignore task, lock is taken, taskVersion="
-																+ lock.version
-																+ ", taskId="
-																+ lock.lock );
+												Report.warning("DS/LOCK_MANAGER", "Ignore task, lock is taken, taskVersion=" + lock.version + ", taskId=" + lock.lock);
 											}
 										} else {
-											Report.warning( "DS/LOCK_MANAGER",
-													"Ignore task, cannot register interest, taskVersion="
-															+ lock.version
-															+ ", taskId="
-															+ lock.lock );
+											Report.warning("DS/LOCK_MANAGER", "Ignore task, cannot register interest, taskVersion=" + lock.version + ", taskId=" + lock.lock);
 										}
 									}
 								}
@@ -224,33 +199,25 @@ final class LockThread implements Runnable {
 						}
 					}
 				} catch (final SQLException e) {
-					Report.exception( "DS/LOCK_MANAGER", "Unhandled exception in main loop", e );
+					Report.exception("DS/LOCK_MANAGER", "Unhandled exception in main loop", e);
 				}
 			}
 		} finally {
 			if (!this.destroyed) {
-				Act.later( null, this, LockThread.TIME_CHECK_PERIOD );
+				Act.later(null, this, LockThread.TIME_CHECK_PERIOD);
 			}
 		}
 	}
-	
-	void stop() {
-		this.destroyed = true;
-	}
-	
+
 	@Override
 	public String toString() {
-		return "LockManagerThread: id="
-				+ this.identity
-				+ ", ownLocks="
-				+ this.manager.getOwnLocks().size()
-				+ ", waitLocks="
-				+ this.manager.getWaitLocks().size()
-				+ ", ownQueue="
-				+ this.manager.getOwnQueue().size()
-				+ ", passQueue="
-				+ this.manager.getPassQueue().size()
-				+ ", table="
-				+ this.tableName;
+		
+		return "LockManagerThread: id=" + this.identity + ", ownLocks=" + this.manager.getOwnLocks().size() + ", waitLocks=" + this.manager.getWaitLocks().size() + ", ownQueue="
+				+ this.manager.getOwnQueue().size() + ", passQueue=" + this.manager.getPassQueue().size() + ", table=" + this.tableName;
+	}
+
+	void stop() {
+		
+		this.destroyed = true;
 	}
 }
