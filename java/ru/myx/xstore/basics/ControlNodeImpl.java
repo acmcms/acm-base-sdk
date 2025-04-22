@@ -32,7 +32,7 @@ import ru.myx.ae3.control.command.ControlCommandset;
 import ru.myx.ae3.control.fieldset.ControlFieldset;
 import ru.myx.ae3.help.Convert;
 import ru.myx.ae3.help.Create;
-import ru.myx.ae3.i3.Handler;
+import ru.myx.ae3.i3.RequestHandler;
 import ru.myx.ae3.serve.ServeRequest;
 import ru.myx.jdbc.lock.Locker;
 import ru.myx.xstore.forms.FormEntryChangeTemplate;
@@ -876,7 +876,7 @@ public final class ControlNodeImpl extends AbstractNode {
 	}
 	
 	@Override
-	public final Handler substituteHandler() {
+	public final RequestHandler substituteHandler() {
 		
 		if (this.handler == null) {
 			final QueryHandler handler = new QueryHandler(this.parent, this.innerId, true);

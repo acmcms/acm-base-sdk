@@ -10,11 +10,11 @@ import ru.myx.ae1.types.Type;
 import ru.myx.ae3.answer.Reply;
 import ru.myx.ae3.answer.ReplyAnswer;
 import ru.myx.ae3.help.Format;
-import ru.myx.ae3.i3.Handler;
+import ru.myx.ae3.i3.RequestHandler;
 import ru.myx.ae3.report.Report;
 import ru.myx.ae3.serve.ServeRequest;
 
-final class QueryHandler implements Handler {
+final class QueryHandler implements RequestHandler {
 	private static final String		OWNER	= "QHANDLER";
 	
 	private final StorageImpl		parent;
