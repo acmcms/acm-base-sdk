@@ -32,7 +32,7 @@ public final class FactoryVirtualSource implements ObjectFactory<Object, ServeRe
 	}
 	
 	@Override
-	public final ObjectSource<ServeRequest> prepare(final String type, final BaseObject attributes, final Object context) {
+	public final ObjectSource<ServeRequest> wrapSource(final String type, final BaseObject attributes, final Object context) {
 
 		final String id = Base.getString(attributes, "id", null);
 		try {
@@ -60,7 +60,7 @@ public final class FactoryVirtualSource implements ObjectFactory<Object, ServeRe
 	@Override
 	public final ServeRequest produce(final String variant, final BaseObject attributes, final Object source) {
 
-		final ObjectSource<ServeRequest> channel = this.prepare(variant, attributes, source);
+		final ObjectSource<ServeRequest> channel = this.wrapSource(variant, attributes, source);
 		while (!channel.isReady() && !channel.isExhausted()) {
 			try {
 				synchronized (channel) {
