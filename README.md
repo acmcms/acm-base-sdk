@@ -1,3 +1,5 @@
 # acm-base-sdk
 
 Renderer plugins for AxiomCMS's whole family of template languages, siblings of `ACM.TPL` (see `ae3.sdk-lang.acm-tpl`, `magic-axiomer`): `renderer/base`, `renderer/ecma`, `renderer/map`, `renderer/text`, `renderer/xslt`, and `renderer/nothing` (a null/no-op renderer). Also `xstore/` — the CRUD forms framework behind the AxiomCMS admin backend (create/edit/delete/version/history/synchronize a storage entry, one `Form*` class per operation), a SQL driver profiler (`sql/profiler`), file-change watching (`file_control`), and legacy event-log/locking helpers (`ae1evtlog`, `ae1locking`). Requires `ae3.api`, `ae3.sdk`, `acm-base-api`.
+
+Note on `renderer/ecma`: this package is only the plugin-registration glue (`AcmEcmaPluginFactory`, `RendererEcmaMain`) for the `ACM.ECMA` skin renderer — a real second templating language, not a dialect of `ACM.TPL`. Its actual parser/compiler, `AcmEcmaLanguageImpl`, lives in `ae3.sdk` (`ru.myx.renderer.ecma`) rather than here, unlike `ACM.TPL`'s dedicated `ae3.sdk-lang.acm-tpl` repo. See `keeper-acm`'s `SKILL.md` ("ACM.ECMA — the sibling renderer") for the language details.
