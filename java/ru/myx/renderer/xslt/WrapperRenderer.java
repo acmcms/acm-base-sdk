@@ -1,6 +1,11 @@
 /*
  * Created on 11.09.2005
  */
+/*
+ * Distinct from the other classes in this package: it is not a renderer plugin
+ * nor a language impl but an ae3 exec Instruction, so each compiled XSLT becomes
+ * one instruction whose toCode() hands back the whole XSL source.
+ */
 package ru.myx.renderer.xslt;
 
 import java.io.StringWriter;

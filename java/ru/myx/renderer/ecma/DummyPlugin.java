@@ -10,6 +10,12 @@ import ru.myx.ae3.exec.Exec;
 /*
  * Created on 05.05.2006
  */
+/*
+ * Distinct from its sibling renderer plugins: it carries no renderer of its own.
+ * The ACM.ECMA language engine is registered by RendererEcmaMain, whose class
+ * lives in ae3.sdk, so destroy/setup/start are deliberately empty and register()
+ * does the only real job, marking ACM.ECMA a server default renderer.
+ */
 final class DummyPlugin implements PluginInstance {
 	@Override
 	public final void destroy() {
